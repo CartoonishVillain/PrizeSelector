@@ -32,6 +32,7 @@ public class Main {
         while ((line = reader.readLine()) != null) {
             prizes.add(line);
         }
+        in.close();
     }
 
     public static void setUpPool() throws IOException {
