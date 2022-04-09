@@ -9,26 +9,37 @@ public class Main {
     static HashMap<String, Integer> pool = new HashMap<>();
     static ArrayList<String> winners = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 	// write your code here
-        setUpPrizes();
-        setUpPool();
+        try {
+            setUpPrizes();
+            setUpPool();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            System.out.println("ioException in input phase");
+        }
         selectWinners();
-        writeOutput();
+
+        try {
+            writeOutput();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            System.out.println("ioException in output phase");
+        }
     }
 
     public static void setUpPrizes() throws IOException {
-        FileInputStream in = null;
+        FileInputStream in;
         try {
             in = new FileInputStream("prizes.txt");
         } catch (FileNotFoundException e) {
-            System.out.println("data.csv not found!");
+            System.out.println("prizes.txt not found!");
             return;
         }
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 
-        String line = "";
+        String line;
         while ((line = reader.readLine()) != null) {
             prizes.add(line);
         }
@@ -36,7 +47,7 @@ public class Main {
     }
 
     public static void setUpPool() throws IOException {
-        FileInputStream in = null;
+        FileInputStream in;
 
         try {
             in = new FileInputStream("data.csv");
@@ -59,7 +70,7 @@ public class Main {
         int counter = 0;
         for (String content : tokens) {
             String truecontent = content.replaceAll("[-+^.:,\"]", ""); //some formats do weird stuff with extra characters. This helps resolve the issue.
-            if (truecontent.toLowerCase().equals("player")) {
+            if (truecontent.equalsIgnoreCase("player")) {
                 uuidIndex = counter; //if the date column is found, mark it's index for future imports
                 break;
             }
@@ -70,7 +81,7 @@ public class Main {
         counter = 0;
         for (String content : tokens) {
             String truecontent = content.replaceAll("[-+^.:,\"]", "");
-            if (truecontent.toLowerCase().equals("entries")) {
+            if (truecontent.equalsIgnoreCase("entries")) {
                 entryIndex = counter;
                 break;
             }
@@ -99,7 +110,6 @@ public class Main {
                 Total += entry.getValue();
             }
             int random = new Random().nextInt(Total);
-            int select = 0;
             String winner = "";
             for (Map.Entry<String, Integer> entry : pool.entrySet()) {
                 random -= entry.getValue();
@@ -115,14 +125,15 @@ public class Main {
     }
 
     public static void writeOutput() throws IOException {
-        BufferedWriter out = null;
+        BufferedWriter out;
         try {
             out = new BufferedWriter(new FileWriter("output.txt"));
         } catch (FileNotFoundException e) {
-            System.out.println("output.txt not found!");
+            System.out.println("output.txt not found! Considering this file is to be made, how did you even do this?");
             return;
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("IO Exception on output");
             return;
         }
 
