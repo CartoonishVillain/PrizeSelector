@@ -7,7 +7,7 @@ import java.util.*;
 public class Main {
     static ArrayList<String> prizes = new ArrayList<>();
     static HashMap<String, Integer> pool = new HashMap<>();
-    static ArrayList<String> winners = new ArrayList<>();
+    static ArrayList<PlayerData> winners = new ArrayList<>();
 
     public static void main(String[] args) {
 	// write your code here
@@ -111,15 +111,17 @@ public class Main {
             }
             int random = new Random().nextInt(Total);
             String winner = "";
+            float chance = 0f;
             for (Map.Entry<String, Integer> entry : pool.entrySet()) {
                 random -= entry.getValue();
                 if (random <= 0) {
                     winner = entry.getKey();
+                    chance = entry.getValue();
                     break;
                 }
             }
 
-            winners.add(winner);
+            winners.add(new PlayerData(winner, chance));
             pool.remove(winner);
         }
     }
@@ -138,8 +140,8 @@ public class Main {
         }
 
         int index = 0;
-        for (String winner : winners) {
-            String WinnerString = prizes.get(index) + ": " + winner;
+        for (PlayerData winner : winners) {
+            String WinnerString = prizes.get(index) + ": " + winner.getUUID() + " (Entries: " + winner.getChance() + ")";
             out.write(WinnerString + "\n");
             System.out.println(WinnerString);
             index++;
