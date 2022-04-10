@@ -6,12 +6,16 @@ import java.util.*;
 
 public class Main {
     static ArrayList<String> prizes = new ArrayList<>();
-    static HashMap<String, Integer> pool = new HashMap<>();
+    static HashMap<String, Float> pool = new HashMap<>();
     static ArrayList<PlayerData> winners = new ArrayList<>();
+    static int mode = -1;
 
     public static void main(String[] args) {
-	// write your code here
+
+        modeSelect();
+
         try {
+            //Initialization phase. Populate required data fields. (Prize pool, and the pool of users)
             setUpPrizes();
             setUpPool();
         } catch (IOException ioe) {
@@ -25,6 +29,38 @@ public class Main {
         } catch (IOException ioe) {
             ioe.printStackTrace();
             System.out.println("ioException in output phase");
+        }
+    }
+
+    public static void modeSelect() {
+        System.out.println("Prize Selector V1.1");
+        System.out.println("Please select filtering mode");
+        System.out.println("0: Lowest full number (Eg: 7.6 entries -> 7 entries)");
+        System.out.println("1: Utilize exact numbers (Eg: 7.6 entries -> 7.6 entries)");
+        System.out.println("2: Standard rounding: (Eg: 7.4 entries -> 7 entries, 7.5 entries -> 8 entries)");
+        Scanner scanner = new Scanner(System.in);
+        while (mode == -1) {
+            String input = scanner.nextLine();
+            int value;
+
+            try {
+                value = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Valid number not detected, please try again! (Integer, no decimal points)");
+                continue;
+            }
+
+            //If the value is 0-2, asign the value to break from the loop, otherwise continue going through and looping.
+            switch (value) {
+                case 0:
+                case 1:
+                case 2:
+                    mode = value;
+                    break;
+                default:
+                    System.out.println("Unfortunately, " + value + " is not a valid mode ID. Please try again with a value between 0-2.");
+                    break;
+            }
         }
     }
 
@@ -96,23 +132,41 @@ public class Main {
             tokens = line.split(",");
             if (!tokens[0].equals("")) {
                 float value = Float.parseFloat(tokens[entryIndex]);
-                pool.put(tokens[uuidIndex], (int) value);
+                pool.put(tokens[uuidIndex], modeMath(value));
             }
         }
 
         in.close();
     }
 
+    public static Float modeMath(Float value) {
+        switch (mode) {
+            case 0:
+                return (float) value.intValue();
+            case 1:
+                return value;
+            case 2:
+                float decimal = value - (float) value.intValue();
+                if (decimal < 0.5f) {
+                    return (float) value.intValue();
+                } else {
+                    return (float) value.intValue() + 1;
+                }
+            default:
+                return 0f;
+        }
+    }
+
     public static void selectWinners() {
         while (pool.size() > 0 && winners.size() < prizes.size()) {
             int Total = 0;
-            for (Map.Entry<String, Integer> entry : pool.entrySet()) {
+            for (Map.Entry<String, Float> entry : pool.entrySet()) {
                 Total += entry.getValue();
             }
             int random = new Random().nextInt(Total);
             String winner = "";
             float chance = 0f;
-            for (Map.Entry<String, Integer> entry : pool.entrySet()) {
+            for (Map.Entry<String, Float> entry : pool.entrySet()) {
                 random -= entry.getValue();
                 if (random <= 0) {
                     winner = entry.getKey();
