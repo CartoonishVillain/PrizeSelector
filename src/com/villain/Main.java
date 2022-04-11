@@ -9,11 +9,14 @@ public class Main {
     static HashMap<String, Float> pool = new HashMap<>();
     static ArrayList<PlayerData> winners = new ArrayList<>();
     static int mode = -1;
+    static boolean attemptConnections;
 
     public static void main(String[] args) {
-
         //Prompt the user for their preferred operation method.
         modeSelect();
+
+        //Prompt the user for if we should contact mojang servers or not.
+        enableNetworking();
 
         try {
             //Initialization phase. Populate required data fields. (Prize pool, and the pool of users)
@@ -64,6 +67,39 @@ public class Main {
                     break;
                 default:
                     System.out.println("Unfortunately, " + value + " is not a valid mode ID. Please try again with a value between 0-2.");
+                    break;
+            }
+        }
+    }
+
+    public static void enableNetworking() {
+        System.out.println("Would you like to connect to Mojang's API to grab player names?");
+        System.out.println("I would confirm you have actual UUIDs before doing this. Otherwise it'll be ineffective.");
+        System.out.println("Also do note that some rate limiting could maybe occur if this is run to many times!");
+        System.out.println("Would you like to use this functionality? (Y/N)");
+        Scanner scanner = new Scanner(System.in);
+        //Loop until the state of connections is set properly
+         boolean done = false;
+        while (!done) {
+            String input = scanner.nextLine();
+
+            switch (input.toLowerCase()) {
+                case "y":
+                case "yes":
+                case "ye":
+                case "true":
+                    attemptConnections = true;
+                    done = true;
+                    break;
+                case "n":
+                case "nah":
+                case "no":
+                case "false":
+                    attemptConnections = false;
+                    done = true;
+                    break;
+                default:
+                    System.out.println("Would you like to use this functionality? (Y/N)");
                     break;
             }
         }
@@ -191,7 +227,7 @@ public class Main {
                 }
             }
 
-            winners.add(new PlayerData(winner, chance)); //Create a new player data object (stories their UUID and value) and add it to the list of winners
+            winners.add(new PlayerData(winner, chance, attemptConnections)); //Create a new player data object (stories their UUID and value) and add it to the list of winners
             pool.remove(winner); //Remove the winner from the pool, as to not continue influencing the drawing with multiple pulls.
         }
     }
@@ -212,7 +248,7 @@ public class Main {
 
         int index = 0;
         for (PlayerData winner : winners) { //For each winner, match the index of the winner to the index of the associated prize.
-            String WinnerString = prizes.get(index) + ": " + winner.getUUID() + " (Entries: " + winner.getChance() + ")"; //List the prize won, player who won it, and their entry count.
+            String WinnerString = prizes.get(index) + ": " + winner.getPlayerName() + winner.getUUID() + " (Entries: " + winner.getChance() + ")"; //List the prize won, player who won it, and their entry count.
             out.write(WinnerString + "\n");
             System.out.println(WinnerString);
             index++;
