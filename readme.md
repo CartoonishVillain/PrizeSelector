@@ -25,3 +25,6 @@ player2,2.4
 player3,9.1
 
 With the correct data provided, it will pick randomly from the available pool of players to hand prizes out to until either there are no more prizes to give, or players to give them to.
+
+
+If minecraft UUIDs are used in the player column, there is an optional mode to enable auto-conversion to display in game name as well
